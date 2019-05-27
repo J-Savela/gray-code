@@ -49,10 +49,10 @@ def enumerateCodes(length, dim):
         # else: add element
         #       update diff and odds
         #       AND stack!!!
+        if isCanonical(code): yield code
         allowed = allowedElems(K)
         #print(f"K: {K}\nStack: {stack}\nCode: {code}\nDiff: {diff}\nOdds: {odds}\nAllowed: {allowed}")
-        if len(allowed) == 0 or K == length:
-            yield code
+        if len(allowed) == 0 or K == length or not isCanonical(code):
             if len(stack) == 0:
                 break
             K, code = backtrack()
