@@ -62,3 +62,54 @@ def enumerateCodes(length, dim):
             updateStack(allowed)
             updateDiffAndOdds(K, elem)
             K += 1
+
+# Combine codes to form longer ones
+def combineCodes(left, right, dim):
+    for lCode in left:
+        for rCode in right:
+            code = lCode + rCode
+            length = len(code)
+            diff = list(map(lambda row: list(map(lambda col: list(map(lambda x: 0, range(dim))), range(length + 1))), range(length + 1)))
+            failed = False
+            for j in range(length):
+                for i in range(j + 1):
+                    for k in range(dim):
+                        diff[i][j + 1][k] = diff[i][j][k]
+                    diff[i][j + 1][code[j]] = 1 - diff[i][j][code[j]]
+                    if j - i > 1 and sum(diff[i][j + 1]) < 2:
+                        failed = True
+                        break
+                if failed: break
+            if failed:
+                continue
+            else:
+                yield code
+
+def groupCodes(codes, dim):
+    def groupOf(code):
+        name = list(map(lambda x: 0, range(dim)))
+        for e in code:
+            name[e] = 1 - name[e]
+        return tuple(name)
+
+    names = [[0],[1]]
+    for i in range(dim-1):
+        newnames = []
+        for n in names:
+            newnames.append([0] + n)
+            newnames.append([1] + n)
+        names = newnames
+    names = set(map(lambda x: tuple(x), names))
+    groups = dict(map(lambda x: (x,[]), names))
+
+    for c in codes:
+        groups[groupOf(c)].append(c)
+
+    return groups
+
+def isCanonical(code):
+    expecting = 0
+    for i in range(len(code)):
+        if code[i] == expecting: expecting += 1
+        elif code[i] > expecting: return False
+    return True
