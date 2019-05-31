@@ -63,6 +63,77 @@ def enumerateCodes(length, dim):
             updateDiffAndOdds(K, elem)
             K += 1
 
+# Enumerate all codes up to length, keep track of forbidden set
+def enumerateCodes_set(length, dim):
+    # stack contains tuples (<index>, <dim_number>)
+    stack = []
+
+    # cumulative sum mod 2 of each dim_number
+    forb = [set(), set()]
+    forb[0].add(tuple(map(lambda x: False, range(dim))))
+    forb[1].add(tuple(map(lambda x: False, range(dim))))
+    for d in range(dim):
+        e = list(map(lambda x: False, range(dim)))
+        e[d] = not e[d]
+        e = tuple(e)
+        forb[1].add(e)
+
+    first = tuple(map(lambda x: False, range(dim)))
+    cumsum = [first]
+    code = []
+
+    # state contains i, stack, forb, newforb, cumsum
+    state = dict({"code":code, "index":0, "stack":stack, "forb": forb, "cumsum":cumsum})
+
+    inds = list(range(dim))
+    inds.reverse()
+    for d in inds:
+        state["stack"].append((0, d))
+
+    def canAdd(state, elem):
+        testvector = list(state["cumsum"][state["index"]])
+        testvector[elem] = not testvector[elem]
+        testvector = tuple(testvector)
+        if len(state["code"]) >= length: return False
+        if testvector in state["forb"][state["index"]]: return False
+        if state["index"] <= dim and not isCanonical(state["code"] + [e]): return False
+        return True
+
+    def backtrack(state, i):
+        state["index"] = i
+        state["code"] = state["code"][:i]
+        state["forb"] = state["forb"][:(i + 2)]
+        state["cumsum"] = state["cumsum"][:(i + 1)]
+
+    def updateState(state, elem):
+        state["code"].append(elem)
+
+        i = state["index"]
+        newcumsum = list(state["cumsum"][i])
+        newcumsum[elem] = not newcumsum[elem]
+        state["cumsum"].append(tuple(newcumsum))
+
+        state["forb"].append(state["forb"][i + 1].copy())
+        for d in range(dim):
+            e = list(state["cumsum"][i + 1])
+            e[d] = not e[d]
+            state["forb"][i + 2].add(tuple(e))
+
+        inds = list(range(dim))
+        inds.reverse()
+        for d in inds:
+            state["stack"].append((i + 1, d))
+
+        state["index"] += 1
+
+    while len(state["stack"]) != 0:
+        j, e = state["stack"].pop()
+        if state["index"] != j:
+            backtrack(state, j)
+        if canAdd(state, e):
+            updateState(state, e)
+            yield state["code"]
+
 # Combine codes to form longer ones
 def combineCodes(left, right, dim):
     for lCode in left:
