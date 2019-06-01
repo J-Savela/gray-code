@@ -1,0 +1,64 @@
+def augmentTree(root, permSoFar, left, right, dim):
+    if root[0][0] >= 2: return
+    if root[0][2]: return
+    print("bye")
+    print(root)
+    print(permSoFar)
+    print(left)
+    print(right)
+    print(dim)
+    choices = set(range(dim)).difference(set(permSoFar))
+    print("hello")
+    for c in choices:
+        newPerm = permSoFar + [c]
+        if left[c] + right[len(permSoFar)] == 1:
+            newOnes = root[0][0] + 1
+        else:
+            newOnes = root[0][0]
+        newMaxOnes = maxOnes(newPerm, left, right)
+        if newOnes + newMaxOnes < 2:
+            newEarlyExit = True
+        else:
+            newEarlyExit = False
+
+        if c in root[1].keys() and root[1][c][0][2]:
+            continue
+
+        if c in root[1].keys():
+            payload = root[1][c][0]
+            payload[0] = newOnes
+            payload[1] = newMaxOnes
+            payload[2] = newEarlyExit
+            if newEarlyExit:
+                root[1][c][1].clear()
+        else:
+            root[1].update({c:([newOnes, newMaxOnes, newEarlyExit], {})})
+
+        augmentTree(root[1][c], newPerm, left, right, dim)
+    return
+
+
+def initRoot(left, right):
+    root = ([0, maxOnes([], left, right), False], dict())
+    return root
+
+
+def maxOnes(permSoFar, left, right):
+    dim = len(left)
+    l_1 = 0
+    r_1 = 0
+    for i in range(dim):
+        if i not in set(permSoFar):
+            l_1 += left[i]
+        if i >= len(permSoFar):
+            r_1 += right[i]
+    l_0 = dim - len(permSoFar) - l_1
+    r_0 = dim - len(permSoFar) - r_1
+    return min([l_0, r_1]) + min([l_1, r_0])
+
+def initOnes(left, right, dim):
+    sum = 0
+    for i in range(dim):
+        if left[i] + right[i] == 1:
+            sum += 1
+    return sum - 2

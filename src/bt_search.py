@@ -156,6 +156,10 @@ def combineCodes(left, right, dim):
             else:
                 yield code
 
+# Find admissible permutations
+def findPerms(left, right, dim):
+    return
+
 def groupCodes(codes, dim):
     def groupOf(code):
         name = list(map(lambda x: 0, range(dim)))
