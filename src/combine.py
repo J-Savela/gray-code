@@ -1,3 +1,12 @@
+# Create a collection of permutation trees out of lists of codes
+def allPermTrees(ls, rs, dim):
+    inds = [(i, j) for i in range(len(ls)) for j in range(len(rs))]
+    trees = dict(map(lambda k: (k, 0), inds))
+    for i, j in inds:
+        trees[i, j] = getPermTree(ls[i], rs[j], dim)
+    return trees
+
+# Create a permutation tree out of two codes
 def getPermTree(left, right, dim):
     cs_r = [tuple(map(lambda x: 0, range(dim)))]
     for i in range(len(right)):
